@@ -28,10 +28,14 @@
     var startWorkingButton = document.getElementById('startWorkingButton');
     var startBreakButton = document.getElementById('startBreakButton');
     var myStatus = document.getElementById('myStatus');
+    var workStart;
 
     startWorkingButton.addEventListener('click', function() {
         myStatus.textContent = "Working";
+        workStart = Date.now();
+        console.log(workStart);
     })
+
 
     startBreakButton.addEventListener('click', function() {
         myStatus.textContent = "Break";
