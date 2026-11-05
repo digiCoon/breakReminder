@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="x-ua-compatible" content="IE=edge">
@@ -14,12 +15,13 @@
 />
 <title>Break Reminder</title>
 </head>
+
 <body>
 <h1>Break Reminder</h1>
 
 <p id="myStatus">Free Time</p> <!--Currently "Working" / "Break"-->
 
-<div id="timer"></div>
+<div id="myTimer"></div>
 
 <button id="startWorkingButton">Start Work</button>
 <button id="startBreakButton">Start Break</button>
@@ -28,18 +30,39 @@
     var startWorkingButton = document.getElementById('startWorkingButton');
     var startBreakButton = document.getElementById('startBreakButton');
     var myStatus = document.getElementById('myStatus');
-    var workStart;
+    var myTimer = document.getElementById('myTimer');
+    var workStart = null;
+    var workTotal = 0;
+    var state = 'idle';
 
     startWorkingButton.addEventListener('click', function() {
-        myStatus.textContent = "Working";
-        workStart = Date.now();
-        console.log(workStart);
-    })
-
+        if (state !== 'working') {
+            myStatus.textContent = "Working";
+            workStart = Date.now();
+            state = 'working';
+        }
+    });
 
     startBreakButton.addEventListener('click', function() {
-        myStatus.textContent = "Break";
+        if (state === 'working') {
+            myStatus.textContent = "Break";
+            workTotal += Date.now() - workStart;
+            workStart = null;
+            state = 'onBreak';
+        }
     });
+
+    function updateTimer() {
+        if (workStart !== null) {
+            var elapsedTime = Date.now() - workStart;
+            myTimer.textContent = elapsedTime + workTotal;
+        } else {
+            myTimer.textContent = workTotal;
+        }
+    }
+
+    setInterval(updateTimer, 1000);
+
 </script>
 </body>
 </html>
