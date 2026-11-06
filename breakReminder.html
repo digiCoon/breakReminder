@@ -55,13 +55,29 @@
     function updateTimer() {
         if (workStart !== null) {
             var elapsedTime = Date.now() - workStart;
-            myTimer.textContent = elapsedTime + workTotal;
+            myTimer.textContent = formatTime(elapsedTime + workTotal);
         } else {
-            myTimer.textContent = workTotal;
+            myTimer.textContent = formatTime(workTotal);
+        }
+    }
+
+    function formatTime(timeSpan) {
+        var sec =  Math.floor((timeSpan % (1000 * 60)) / 1000);
+        var min = Math.floor((timeSpan % (1000 * 60 * 60)) / (1000 * 60));
+        var hours = Math.floor(timeSpan / (1000 * 60 * 60));
+        return addZero(hours) + ':' + addZero(min) + ':' + addZero(sec);
+    }
+
+    function addZero(number) {
+        if (number < 10) {
+            return '0' + number;
+        } else {
+            return number;
         }
     }
 
     setInterval(updateTimer, 1000);
+    formatTime(5432000)
 
 </script>
 </body>
