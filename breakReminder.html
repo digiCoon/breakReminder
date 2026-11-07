@@ -2,18 +2,18 @@
 <html lang='en'>
 
 <head>
-<meta charset='UTF-8'>
-<meta http-equiv='x-ua-compatible' content='IE=edge'>
-<hta:application
-        applicationname='Break Reminder'
-        id='breakReminder'
-        singleinstance='yes'
-        border='thick'
-        borderstyle='normal'
-        maximizeButton='yes'
-        minimizeButton='yes'
-/>
-<title>Break Reminder</title>
+    <meta charset='UTF-8'>
+    <meta http-equiv='x-ua-compatible' content='IE=edge'>
+    <hta:application
+            applicationname='Break Reminder'
+            id='breakReminder'
+            singleinstance='yes'
+            border='thick'
+            borderstyle='normal'
+            maximizeButton='yes'
+            minimizeButton='yes'
+    />
+    <title>Break Reminder</title>
 </head>
 
 <body>
@@ -28,6 +28,9 @@
 <button id='startBreakButton'>Start Break</button>
 
 <script>
+    // TODO: Set back to 60 seconds before release. 1000 = time lapse for testing.
+    var MINUTE = 1000;
+
     var startWorkingButton = document.getElementById('startWorkingButton');
     var startBreakButton = document.getElementById('startBreakButton');
     var myStatus = document.getElementById('myStatus');
@@ -39,19 +42,24 @@
     var breakStart = null;
     var breakTotal = 0;
 
-    startWorkingButton.addEventListener('click', function() {
+    // Work Handler
+    startWorkingButton.addEventListener('click', function () {
         if (state !== 'working') {
             myStatus.textContent = 'Working';
             workStart = Date.now();
             if (state === 'onBreak') {
-                breakTotal += Date.now() - breakStart;
+                var breakDuration = Date.now() - breakStart;
+                if (breakDuration >= (5 * MINUTE)) {
+                    breakTotal += breakDuration;
+                }
                 breakStart = null;
             }
             state = 'working';
         }
     });
 
-    startBreakButton.addEventListener('click', function() {
+    // Break Handler
+    startBreakButton.addEventListener('click', function () {
         if (state === 'working') {
             myStatus.textContent = 'On break';
             workTotal += Date.now() - workStart;
@@ -77,7 +85,7 @@
     }
 
     function formatTime(timeSpan) {
-        var sec =  Math.floor((timeSpan % (1000 * 60)) / 1000);
+        var sec = Math.floor((timeSpan % (1000 * 60)) / 1000);
         var min = Math.floor((timeSpan % (1000 * 60 * 60)) / (1000 * 60));
         var hours = Math.floor(timeSpan / (1000 * 60 * 60));
         return addZero(hours) + ':' + addZero(min) + ':' + addZero(sec);
@@ -92,7 +100,6 @@
     }
 
     setInterval(updateTimer, 1000);
-
 
 </script>
 </body>
