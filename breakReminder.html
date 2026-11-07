@@ -33,6 +33,7 @@
 <button id='startWorkingButton'>Start Work</button>
 <button id='startBreakButton'>Start Break</button>
 
+<!-- Break reminder (hidden until a reminder is due) -->
 <div id='timeForBreak' style='display: none;'>
     Time for a Break!
     <button id='closeTimeForBreakButton'>Dismiss</button>
@@ -40,8 +41,8 @@
 
 
 <script>
-    // TODO: Set back to 60 seconds before release. 1000 = time lapse for testing.
-    var MINUTE = 1000;
+    // TODO: Set to 60 * 1000 before release. Smaller values = time lapse for testing.
+    var MINUTE = 100;
 
     // DOM elements
     var startWorkingButton = document.getElementById('startWorkingButton');
@@ -53,12 +54,12 @@
     var closeTimeForBreakButton = document.getElementById('closeTimeForBreakButton');
 
     // App state
-    var state = 'idle';     // 'idle' | 'working' | 'onBreak'
-    var workStart = null;   // Start of the current work segment (null = not working)
-    var workTotal = 0;      // Sum of finished work segments (ms)
-    var breakStart = null;  // Start of the current break (null = not on break)
-    var breakTotal = 0;     // Break credit: sum of breaks of at least 5 minutes (ms)
-    var nextReminder = 60 * MINUTE;
+    var state = 'idle';             // 'idle' | 'working' | 'onBreak'
+    var workStart = null;           // Start of the current work segment (null = not working)
+    var workTotal = 0;              // Sum of finished work segments (ms)
+    var breakStart = null;          // Start of the current break (null = not on break)
+    var breakTotal = 0;             // Break credit: sum of breaks of at least 5 minutes (ms)
+    var nextReminder = 60 * MINUTE; // Work time at which the next reminder appears (ms)
 
     // Work Handler: start working or end a break
     startWorkingButton.addEventListener('click', function () {
@@ -77,6 +78,8 @@
                     workTotal = 0;
                     breakTotal = 0;
                     nextReminder = 60 * MINUTE;
+                    timeForBreak.style.display = 'none';
+                    closeTimeForBreakButton.style.display = '';
                 }
                 breakStart = null;
             }
@@ -100,7 +103,7 @@
         timeForBreak.style.display = 'none';
     });
 
-    // Updates both timer displays (called every second)
+    // Updates the displays and shows reminders (called every second)
     function updateTimer() {
         // Work time: finished segments + running segment
         var currentWork = workTotal;
@@ -118,11 +121,16 @@
         // Show reminder, then schedule the next one 10 minutes later
         if (currentWork >= nextReminder) {
             timeForBreak.style.display = 'block';
+            // From 90 minutes on: no dismiss, forced break
+            if (nextReminder >= 90 * MINUTE) {
+                closeTimeForBreakButton.style.display = 'none';
+            }
             nextReminder += 10 * MINUTE;
         }
     }
 
     // Converts milliseconds to 'hh:mm:ss'
+    // Uses real milliseconds (not MINUTE) on purpose: the display always shows real time
     function formatTime(timeSpan) {
         var sec = Math.floor((timeSpan % (1000 * 60)) / 1000);
         var min = Math.floor((timeSpan % (1000 * 60 * 60)) / (1000 * 60));
