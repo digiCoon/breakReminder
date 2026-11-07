@@ -33,6 +33,12 @@
 <button id='startWorkingButton'>Start Work</button>
 <button id='startBreakButton'>Start Break</button>
 
+<div id='timeForBreak' style='display: none;'>
+    Time for a Break!
+    <button id='closeTimeForBreakButton'>Dismiss</button>
+</div>
+
+
 <script>
     // TODO: Set back to 60 seconds before release. 1000 = time lapse for testing.
     var MINUTE = 1000;
@@ -43,6 +49,8 @@
     var myStatus = document.getElementById('myStatus');
     var myTimer = document.getElementById('myTimer');
     var breakTimer = document.getElementById('breakTimer');
+    var timeForBreak = document.getElementById('timeForBreak');
+    var closeTimeForBreakButton = document.getElementById('closeTimeForBreakButton');
 
     // App state
     var state = 'idle';     // 'idle' | 'working' | 'onBreak'
@@ -83,6 +91,11 @@
             breakStart = Date.now();
             state = 'onBreak';
         }
+    });
+
+    // Dismiss Handler: hide the break reminder
+    closeTimeForBreakButton.addEventListener('click', function () {
+        timeForBreak.style.display = 'none';
     });
 
     // Updates both timer displays (called every second)
