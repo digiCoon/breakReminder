@@ -3,7 +3,9 @@
 
 <head>
     <meta charset='UTF-8'>
+    <!-- Use the newest available IE engine mode in the HTA -->
     <meta http-equiv='x-ua-compatible' content='IE=edge'>
+    <!-- HTA window settings (ignored by normal browsers) -->
     <hta:application
             applicationname='Break Reminder'
             id='breakReminder'
@@ -19,9 +21,13 @@
 <body>
 <h1>Break Reminder</h1>
 
-<p id='myStatus'>Free Time</p> <!--Currently 'Working' / 'Break'-->
+<!-- Current status: 'Free Time' / 'Working' / 'On break' -->
+<p id='myStatus'>Free Time</p>
 
+<!-- Total work time -->
 <div id='myTimer'></div>
+
+<!-- Break time (break credit + running break) -->
 <div id='breakTimer'></div>
 
 <button id='startWorkingButton'>Start Work</button>
@@ -31,26 +37,36 @@
     // TODO: Set back to 60 seconds before release. 1000 = time lapse for testing.
     var MINUTE = 1000;
 
+    // DOM elements
     var startWorkingButton = document.getElementById('startWorkingButton');
     var startBreakButton = document.getElementById('startBreakButton');
     var myStatus = document.getElementById('myStatus');
     var myTimer = document.getElementById('myTimer');
     var breakTimer = document.getElementById('breakTimer');
-    var state = 'idle';
-    var workStart = null;
-    var workTotal = 0;
-    var breakStart = null;
-    var breakTotal = 0;
 
-    // Work Handler
+    // App state
+    var state = 'idle';     // 'idle' | 'working' | 'onBreak'
+    var workStart = null;   // Start of the current work segment (null = not working)
+    var workTotal = 0;      // Sum of finished work segments (ms)
+    var breakStart = null;  // Start of the current break (null = not on break)
+    var breakTotal = 0;     // Break credit: sum of breaks of at least 5 minutes (ms)
+
+    // Work Handler: start working or end a break
     startWorkingButton.addEventListener('click', function () {
         if (state !== 'working') {
             myStatus.textContent = 'Working';
             workStart = Date.now();
+            // Coming back from a break: check if it counts towards the break credit
             if (state === 'onBreak') {
                 var breakDuration = Date.now() - breakStart;
+                // Only breaks of at least 5 minutes count
                 if (breakDuration >= (5 * MINUTE)) {
                     breakTotal += breakDuration;
+                }
+                // Break credit full: start a new work cycle
+                if (breakTotal >= (10 * MINUTE)) {
+                    workTotal = 0;
+                    breakTotal = 0;
                 }
                 breakStart = null;
             }
@@ -58,32 +74,36 @@
         }
     });
 
-    // Break Handler
+    // Break Handler: pause the work timer and start a break
     startBreakButton.addEventListener('click', function () {
         if (state === 'working') {
             myStatus.textContent = 'On break';
-            workTotal += Date.now() - workStart;
+            workTotal += Date.now() - workStart;  // Save the finished work segment
             workStart = null;
             breakStart = Date.now();
             state = 'onBreak';
         }
     });
 
+    // Updates both timer displays (called every second)
     function updateTimer() {
+        // Work time: finished segments + running segment
         if (workStart !== null) {
-            var elapsedTime = Date.now() - workStart;
-            myTimer.textContent = formatTime(elapsedTime + workTotal);
+            var workDuration = Date.now() - workStart;
+            myTimer.textContent = formatTime(workDuration + workTotal);
         } else {
             myTimer.textContent = formatTime(workTotal);
         }
+        // Break time: break credit + running break
         if (breakStart !== null) {
-            var elapsedBreakTime = Date.now() - breakStart;
-            breakTimer.textContent = formatTime(elapsedBreakTime + breakTotal);
+            var breakDuration = Date.now() - breakStart;
+            breakTimer.textContent = formatTime(breakDuration + breakTotal);
         } else {
             breakTimer.textContent = formatTime(breakTotal);
         }
     }
 
+    // Converts milliseconds to 'hh:mm:ss'
     function formatTime(timeSpan) {
         var sec = Math.floor((timeSpan % (1000 * 60)) / 1000);
         var min = Math.floor((timeSpan % (1000 * 60 * 60)) / (1000 * 60));
@@ -91,6 +111,7 @@
         return addZero(hours) + ':' + addZero(min) + ':' + addZero(sec);
     }
 
+    // Adds a leading zero to numbers below 10 (5 -> '05')
     function addZero(number) {
         if (number < 10) {
             return '0' + number;
@@ -99,6 +120,7 @@
         }
     }
 
+    // Ticker: refresh the displays once per second
     setInterval(updateTimer, 1000);
 
 </script>
