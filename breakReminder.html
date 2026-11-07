@@ -76,6 +76,7 @@
                 if (breakTotal >= (10 * MINUTE)) {
                     workTotal = 0;
                     breakTotal = 0;
+                    nextReminder = 60 * MINUTE;
                 }
                 breakStart = null;
             }
@@ -106,17 +107,15 @@
         if (workStart !== null) {
             currentWork += Date.now() - workStart;
         }
-
         // Break time: break credit + running break
         var currentBreak = breakTotal;
         if (breakStart !== null) {
             currentBreak += Date.now() - breakStart;
         }
-
         // Update displays
         myTimer.textContent = formatTime(currentWork);
         breakTimer.textContent = formatTime(currentBreak);
-
+        // Show reminder, then schedule the next one 10 minutes later
         if (currentWork >= nextReminder) {
             timeForBreak.style.display = 'block';
             nextReminder += 10 * MINUTE;
