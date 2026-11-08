@@ -10,20 +10,18 @@ Break Reminder is a single file. No installation, no admin rights, no dependenci
 
 ## How it works
 
-Everything is controlled manually with two buttons. There is no automatic idle detection via mouse or keyboard on purpose: staring at the screen without touching anything is still screen time.
+Everything is controlled manually with a single button that switches between two actions. There is no automatic idle detection via mouse or keyboard on purpose: staring at the screen without touching anything is still screen time.
 
 - **Start Work** – the work timer runs. Clicking it after a break ends the break and the work timer continues.
 - **Start Break** – the work timer pauses and the break timer starts.
 
-A status line shows what is going on: *Free Time* (not started yet), *Working* or *On break*. Below it you see the total work time and the break time, both as `hh:mm:ss`.
-
-Clicks that make no sense in the current state are ignored. For example, *Start Break* does nothing before you have started working.
+The button always shows the action the next click will trigger. A status line shows what is going on right now: *Free Time* (not started yet), *Working* or *On break*. Below it you see the total work time and the break time, both as `hh:mm:ss`.
 
 To finish for the day, simply **close the window**. Nothing is saved, so closing resets everything.
 
 ### Why there is no Stop button
 
-A Stop or Reset button would make it far too easy to cheat: one click after 85 minutes and the clock starts over without a real break. Closing the window has the same effect, but it is a more deliberate action than a click right next to *Start Break*. So by design there are only two actions: work and break.
+A Stop or Reset button would make it far too easy to cheat: one click after 85 minutes and the clock starts over without a real break. Closing the window has the same effect, but it is a more deliberate action than a quick click in the app. So by design there are only two actions: work and break.
 
 ---
 
@@ -97,7 +95,7 @@ A planned PowerShell version (see Roadmap) is expected to solve this, as it can 
 - **One file:** HTML, CSS and JavaScript all live in a single file.
 - **ES5 JavaScript:** HTAs use the legacy Internet Explorer engine, so the code sticks to ES5 (`var`, `function`, no arrow functions, no template literals, no classes).
 - **Timestamps instead of ticks:** elapsed time is calculated from `Date.now()` rather than by counting timer ticks, because timers get throttled when the window is in the background. A single ticker refreshes the display once per second.
-- **State handling:** the app is always in one of three states (`idle`, `working`, `onBreak`), and each button only reacts in states where it makes sense.
+- **State handling:** the app is always in one of three states (`idle`, `working`, `onBreak`). The toggle button checks the current state and decides whether to start working or start a break.
 
 ### Development
 
@@ -116,7 +114,7 @@ A planned PowerShell version (see Roadmap) is expected to solve this, as it can 
 - [x] Break credit (5-minute minimum, reset at 10 minutes)
 - [x] Dismissible reminders at 60, 70 and 80 minutes
 - [x] Forced break at 90 minutes (full screen, no dismiss)
-- [ ] Single toggle button (Work ↔ Break)
+- [x] Single toggle button (Work ↔ Break)
 - [ ] Styling (colors, layout, a more striking forced-break screen)
 - [ ] Final testing in the legacy engine and first release
 - [ ] Version 2 in PowerShell (always-on-top window)
