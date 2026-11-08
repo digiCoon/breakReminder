@@ -4,22 +4,26 @@ A tiny, portable break reminder for Windows. It nudges you out of the focus tunn
 
 Break Reminder is a single file. No installation, no admin rights, no dependencies. Put it on a USB stick or a network drive and run it anywhere.
 
-> **Status:** Work in progress. See [Roadmap](#roadmap).
+> **Status:** Work in progress. The core features work; styling and polish are still to come. See [Roadmap](#roadmap).
 
 ---
 
 ## How it works
 
-Everything is controlled manually with buttons. There is no automatic idle detection via mouse or keyboard on purpose: staring at the screen without touching anything is still screen time.
+Everything is controlled manually with two buttons. There is no automatic idle detection via mouse or keyboard on purpose: staring at the screen without touching anything is still screen time.
 
-- **Work** – the work timer runs. Clicking *Work* after a break ends the break and the work timer continues.
-- **Break** – the work timer pauses and a break timer starts.
+- **Start Work** – the work timer runs. Clicking it after a break ends the break and the work timer continues.
+- **Start Break** – the work timer pauses and the break timer starts.
+
+A status line shows what is going on: *Free Time* (not started yet), *Working* or *On break*. Below it you see the total work time and the break time, both as `hh:mm:ss`.
+
+Clicks that make no sense in the current state are ignored. For example, *Start Break* does nothing before you have started working.
 
 To finish for the day, simply **close the window**. Nothing is saved, so closing resets everything.
 
 ### Why there is no Stop button
 
-A Stop or Reset button would make it far too easy to cheat: one click after 85 minutes and the clock starts over without a real break. Closing the window has the same effect, but it is a more deliberate action than a click right next to *Break*. So by design there are only two actions: Work and Break.
+A Stop or Reset button would make it far too easy to cheat: one click after 85 minutes and the clock starts over without a real break. Closing the window has the same effect, but it is a more deliberate action than a click right next to *Start Break*. So by design there are only two actions: work and break.
 
 ---
 
@@ -29,20 +33,22 @@ A Stop or Reset button would make it far too easy to cheat: one click after 85 m
 
 - A break only **counts if it lasts at least 5 minutes**. It then counts with its full length (a 7-minute break adds 7 minutes).
 - Breaks **shorter than 5 minutes** do not count towards the break credit. The work timer still stays paused during them.
-- As soon as the **break credit reaches 10 minutes or more**, everything is reset (work time and break credit back to zero).
+- As soon as the **break credit reaches 10 minutes or more**, everything is reset: work time, break credit and reminders start over.
 
 Short interruptions like grabbing a coffee are not a real break. The 5-minute minimum is a compromise: if you can't take 10 minutes in one go, two shorter breaks of at least 5 minutes each are fine too.
 
 ### Reminders
 
-Reminders are based on **actual work time**, not wall-clock time.
+Reminders are based on **actual work time**, not wall-clock time. Breaks do not count as work time.
 
 | Work time | Reminder |
 |---|---|
-| 60 min | Reminder (dismissible) |
-| 70 min | Reminder (dismissible) |
-| 80 min | Reminder (dismissible) |
-| 90 min | **Strong reminder** (e.g. full screen, flashing, sound) |
+| 60 min | "Time for a Break!" – the window moves to the center of the main screen. Dismissible. |
+| 70 min | Same as above |
+| 80 min | Same as above |
+| 90 min and every 10 min after | **Forced break:** the window fills the whole screen and the reminder can no longer be dismissed. It only disappears once the break credit is full. |
+
+The window can still be minimized at any time, even during a forced break.
 
 ### Example
 
@@ -65,8 +71,8 @@ There are no logs and no statistics. Break Reminder only cares about the current
 
 1. Download `breakReminder.hta` from the [Releases](../../releases) page.
 2. If Windows blocks the file because it was downloaded from the internet: right-click → *Properties* → tick **Unblock** → *OK*.
-3. Double-click the file. It opens as its own window.
-4. Click **Work** and get to work.
+3. Double-click the file. It opens as a small window in the center of your main screen.
+4. Click **Start Work** and get to work.
 
 ### Requirements
 
@@ -75,27 +81,42 @@ There are no logs and no statistics. Break Reminder only cares about the current
 
 ---
 
+## Known limitations
+
+**The window cannot bring itself to the front.** Windows deliberately prevents programs from pushing themselves in front of the window you are working in, so a reminder can appear behind other windows. The following approaches were tested and did not work reliably: `window.focus()`, `alert()`, `WScript.Shell.AppActivate`, and moving the window off-screen and back. The window only came to the front when it was moved to a different monitor.
+
+**Tip:** Keep the small window visible somewhere, for example in a corner of your screen or on a second monitor.
+
+A planned PowerShell version (see Roadmap) is expected to solve this, as it can keep a window always on top.
+
+---
+
 ## How it's built
 
 - **HTA (HTML Application):** a plain HTML file with the `.hta` extension. Windows runs it with the built-in `mshta.exe` as a standalone window without a browser.
 - **One file:** HTML, CSS and JavaScript all live in a single file.
 - **ES5 JavaScript:** HTAs use the legacy Internet Explorer engine, so the code sticks to ES5 (`var`, `function`, no arrow functions, no template literals, no classes).
-- **Timestamps instead of ticks:** elapsed time is calculated from `Date.now()` rather than by counting timer ticks, because timers get throttled when the window is in the background.
+- **Timestamps instead of ticks:** elapsed time is calculated from `Date.now()` rather than by counting timer ticks, because timers get throttled when the window is in the background. A single ticker refreshes the display once per second.
+- **State handling:** the app is always in one of three states (`idle`, `working`, `onBreak`), and each button only reacts in states where it makes sense.
 
 ### Development
 
-- `breakReminder.html` is the source file. It can be opened and debugged in any browser.
-- To test it as an application, copy it to `breakReminder.hta` and double-click the copy.
+- `breakReminder.html` is the source file. It can be opened and debugged in any browser. Window size and position are only applied in the HTA.
+- To test it as an application, copy it to a separate test folder, rename the copy to `breakReminder.hta` and double-click it.
 - The `.hta` file is never edited directly and is not committed; it is attached to GitHub Releases instead.
+- **Time lapse for testing:** the constant `MINUTE` at the top of the script defines how long one minute is in milliseconds. Set it to a small value (e.g. `1000` or `100`) to test the rules quickly, and back to `60 * 1000` before a release.
 
 ---
 
 ## Roadmap
 
-- [ ] Show a running work timer
-- [ ] Work / Break with separate work and break timers
-- [ ] Single toggle button (Work ↔ Break) and a status line
-- [ ] Break credit (5-minute minimum, reset at 10 minutes)
-- [ ] Dismissible reminders at 60, 70 and 80 minutes
-- [ ] Strong reminder at 90 minutes
-- [ ] HTA polish and testing in the legacy engine
+- [x] Show a running work timer
+- [x] Work / Break with separate work and break timers
+- [x] Status line (*Free Time* / *Working* / *On break*)
+- [x] Break credit (5-minute minimum, reset at 10 minutes)
+- [x] Dismissible reminders at 60, 70 and 80 minutes
+- [x] Forced break at 90 minutes (full screen, no dismiss)
+- [ ] Single toggle button (Work ↔ Break)
+- [ ] Styling (colors, layout, a more striking forced-break screen)
+- [ ] Final testing in the legacy engine and first release
+- [ ] Version 2 in PowerShell (always-on-top window)
