@@ -4,7 +4,7 @@ A tiny, portable break reminder for Windows. It nudges you out of the focus tunn
 
 Break Reminder is a single file. No installation, no admin rights, no dependencies. Put it on a USB stick or a network drive and run it anywhere.
 
-> **Status:** Work in progress. The core features work; styling and polish are still to come. See [Roadmap](#roadmap).
+> **Status:** Version 1.0 – all core features are done. Next up: a PowerShell version. See [Roadmap](#roadmap).
 
 ---
 
@@ -12,10 +12,10 @@ Break Reminder is a single file. No installation, no admin rights, no dependenci
 
 Everything is controlled manually with a single button that switches between two actions. There is no automatic idle detection via mouse or keyboard on purpose: staring at the screen without touching anything is still screen time.
 
-- **Start Work** – the work timer runs. Clicking it after a break ends the break and the work timer continues.
-- **Start Break** – the work timer pauses and the break timer starts.
+- **start work** – the work timer runs. Clicking it after a break ends the break and the work timer continues.
+- **start break** – the work timer pauses and the break timer starts.
 
-The button always shows the action the next click will trigger. A status line shows what is going on right now: *Free Time* (not started yet), *Working* or *On break*. Below it you see the total work time and the break time, both as `hh:mm:ss`.
+The button always shows the action the next click will trigger. A colored status line shows what is going on right now: *free time* (not started yet, purple), *working* (pink) or *on break* (cyan). Below it you see the total work time and the break time, both as `hh:mm:ss`.
 
 To finish for the day, simply **close the window**. Nothing is saved, so closing resets everything.
 
@@ -41,7 +41,7 @@ Reminders are based on **actual work time**, not wall-clock time. Breaks do not 
 
 | Work time | Reminder |
 |---|---|
-| 60 min | "Time for a Break!" – the window moves to the center of the main screen. Dismissible. |
+| 60 min | "time for a break!" – the window moves to the center of the main screen. Dismissible. |
 | 70 min | Same as above |
 | 80 min | Same as above |
 | 90 min and every 10 min after | **Forced break:** the window fills the whole screen and the reminder can no longer be dismissed. It only disappears once the break credit is full. |
@@ -70,7 +70,7 @@ There are no logs and no statistics. Break Reminder only cares about the current
 1. Download `breakReminder.hta` from the [Releases](../../releases) page.
 2. If Windows blocks the file because it was downloaded from the internet: right-click → *Properties* → tick **Unblock** → *OK*.
 3. Double-click the file. It opens as a small window in the center of your main screen.
-4. Click **Start Work** and get to work.
+4. Click **start work** and get to work.
 
 ### Requirements
 
@@ -95,6 +95,7 @@ A planned PowerShell version (see Roadmap) is expected to solve this, as it can 
 - **One file:** HTML, CSS and JavaScript all live in a single file.
 - **ES5 JavaScript:** HTAs use the legacy Internet Explorer engine, so the code sticks to ES5 (`var`, `function`, no arrow functions, no template literals, no classes).
 - **Timestamps instead of ticks:** elapsed time is calculated from `Date.now()` rather than by counting timer ticks, because timers get throttled when the window is in the background. A single ticker refreshes the display once per second.
+- **Look:** dark theme in the colors of [digicoon.de](https://digicoon.de/). The font [Space Grotesk](https://github.com/floriankarsten/space-grotesk) is embedded as Base64 in the file, so it works offline without being installed. Space Grotesk is licensed under the SIL Open Font License 1.1, which allows embedding.
 - **State handling:** the app is always in one of three states (`idle`, `working`, `onBreak`). The toggle button checks the current state and decides whether to start working or start a break.
 
 ### Development
@@ -110,11 +111,11 @@ A planned PowerShell version (see Roadmap) is expected to solve this, as it can 
 
 - [x] Show a running work timer
 - [x] Work / Break with separate work and break timers
-- [x] Status line (*Free Time* / *Working* / *On break*)
+- [x] Status line (*free time* / *working* / *on break*)
 - [x] Break credit (5-minute minimum, reset at 10 minutes)
 - [x] Dismissible reminders at 60, 70 and 80 minutes
 - [x] Forced break at 90 minutes (full screen, no dismiss)
 - [x] Single toggle button (Work ↔ Break)
-- [ ] Styling (colors, layout, a more striking forced-break screen)
-- [ ] Final testing in the legacy engine and first release
+- [x] Styling (digiCoon colors, card layout, embedded font)
+- [x] Testing in the legacy engine and first release (v1.0)
 - [ ] Version 2 in PowerShell (always-on-top window)
