@@ -30,8 +30,7 @@
 <!-- Break time (break credit + running break) -->
 <div id='breakTimer'></div>
 
-<button id='startWorkingButton'>Start Work</button>
-<button id='startBreakButton'>Start Break</button>
+<button id='toggleButton'>Start Work</button>
 
 <!-- Break reminder (hidden until a reminder is due) -->
 <div id='timeForBreak' style='display: none;'>
@@ -51,8 +50,7 @@
     var MINUTE = 100;
 
     // DOM elements
-    var startWorkingButton = document.getElementById('startWorkingButton');
-    var startBreakButton = document.getElementById('startBreakButton');
+    var toggleButton = document.getElementById('toggleButton');
     var myStatus = document.getElementById('myStatus');
     var myTimer = document.getElementById('myTimer');
     var breakTimer = document.getElementById('breakTimer');
@@ -67,50 +65,53 @@
     var breakTotal = 0;             // Break credit: sum of breaks of at least 5 minutes (ms)
     var nextReminder = 60 * MINUTE; // Work time at which the next reminder appears (ms)
 
-    // Button handlers
-    startWorkingButton.addEventListener('click', startWork);
-    startBreakButton.addEventListener('click', startBreak);
-
-    // Dismiss Handler: hide the break reminder
+    // Event handlers
+    toggleButton.addEventListener('click', toggleWorkBreak);
     closeTimeForBreakButton.addEventListener('click', function () {
         timeForBreak.style.display = 'none';
         setDefaultWindow();
     });
 
-    function startWork() {
+    function toggleWorkBreak() {
         if (state !== 'working') {
-            myStatus.textContent = 'Working';
-            workStart = Date.now();
-            // Coming back from a break: check if it counts towards the break credit
-            if (state === 'onBreak') {
-                var breakDuration = Date.now() - breakStart;
-                // Only breaks of at least 5 minutes count
-                if (breakDuration >= (5 * MINUTE)) {
-                    breakTotal += breakDuration;
-                }
-                // Break credit full: start a new work cycle
-                if (breakTotal >= (10 * MINUTE)) {
-                    workTotal = 0;
-                    breakTotal = 0;
-                    nextReminder = 60 * MINUTE;
-                    timeForBreak.style.display = 'none';
-                    closeTimeForBreakButton.style.display = '';
-                    setDefaultWindow();
-                }
-                breakStart = null;
-            }
-            state = 'working';
+            startWork();
+            toggleButton.textContent = 'Start Break';
+        } else {
+            startBreak();
+            toggleButton.textContent = 'Start Work';
         }
     }
 
-    function startBreak() {
-        if (state === 'working') {
-            myStatus.textContent = 'On break';
-            workTotal += Date.now() - workStart;  // Save the finished work segment
-            workStart = null;
-            breakStart = Date.now();
-            state = 'onBreak';
+    function startWork() {
+        myStatus.textContent = 'Working';
+        workStart = Date.now();
+        // Coming back from a break: check if it counts towards the break credit
+        if (state === 'onBreak') {
+            var breakDuration = Date.now() - breakStart;
+            // Only breaks of at least 5 minutes count
+            if (breakDuration >= (5 * MINUTE)) {
+                breakTotal += breakDuration;
+            }
+            // Break credit full: start a new work cycle
+            if (breakTotal >= (10 * MINUTE)) {
+                workTotal = 0;
+                breakTotal = 0;
+                nextReminder = 60 * MINUTE;
+                timeForBreak.style.display = 'none';
+                closeTimeForBreakButton.style.display = '';
+                setDefaultWindow();
+            }
+            breakStart = null;
         }
+        state = 'working';
+    }
+
+    function startBreak() {
+        myStatus.textContent = 'On break';
+        workTotal += Date.now() - workStart;  // Save the finished work segment
+        workStart = null;
+        breakStart = Date.now();
+        state = 'onBreak';
     }
 
     // Updates the displays and shows reminders (called every second)
@@ -163,10 +164,12 @@
     function centerWindow() {
         window.moveTo((screen.availWidth - WINDOW_WIDTH) / 2, (screen.availHeight - WINDOW_HEIGHT) / 2);
     }
+
     function setDefaultWindow() {
         centerWindow();
         window.resizeTo(WINDOW_WIDTH, WINDOW_HEIGHT);
     }
+
     function setFullScreenWindow() {
         window.moveTo(0, 0);
         window.resizeTo(screen.availWidth, screen.availHeight);
