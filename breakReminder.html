@@ -41,6 +41,12 @@
 
 
 <script>
+    // Default window size
+    var WINDOW_WIDTH = 400;
+    var WINDOW_HEIGHT = 300;
+    // Start with the default window
+    setDefaultWindow();
+
     // TODO: Set to 60 * 1000 before release. Smaller values = time lapse for testing.
     var MINUTE = 100;
 
@@ -80,6 +86,7 @@
                     nextReminder = 60 * MINUTE;
                     timeForBreak.style.display = 'none';
                     closeTimeForBreakButton.style.display = '';
+                    setDefaultWindow();
                 }
                 breakStart = null;
             }
@@ -101,6 +108,7 @@
     // Dismiss Handler: hide the break reminder
     closeTimeForBreakButton.addEventListener('click', function () {
         timeForBreak.style.display = 'none';
+        setDefaultWindow();
     });
 
     // Updates the displays and shows reminders (called every second)
@@ -121,9 +129,11 @@
         // Show reminder, then schedule the next one 10 minutes later
         if (currentWork >= nextReminder) {
             timeForBreak.style.display = 'block';
+            centerWindow();
             // From 90 minutes on: no dismiss, forced break
             if (nextReminder >= 90 * MINUTE) {
                 closeTimeForBreakButton.style.display = 'none';
+                setFullScreenWindow();
             }
             nextReminder += 10 * MINUTE;
         }
@@ -145,6 +155,19 @@
         } else {
             return number;
         }
+    }
+
+    // Window helpers (HTA only, browsers ignore window size and position)
+    function centerWindow() {
+        window.moveTo((screen.availWidth - WINDOW_WIDTH) / 2, (screen.availHeight - WINDOW_HEIGHT) / 2);
+    }
+    function setDefaultWindow() {
+        centerWindow();
+        window.resizeTo(WINDOW_WIDTH, WINDOW_HEIGHT);
+    }
+    function setFullScreenWindow() {
+        window.moveTo(0, 0);
+        window.resizeTo(screen.availWidth, screen.availHeight);
     }
 
     // Ticker: refresh the displays once per second
