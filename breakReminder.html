@@ -67,8 +67,17 @@
     var breakTotal = 0;             // Break credit: sum of breaks of at least 5 minutes (ms)
     var nextReminder = 60 * MINUTE; // Work time at which the next reminder appears (ms)
 
-    // Work Handler: start working or end a break
-    startWorkingButton.addEventListener('click', function () {
+    // Button handlers
+    startWorkingButton.addEventListener('click', startWork);
+    startBreakButton.addEventListener('click', startBreak);
+
+    // Dismiss Handler: hide the break reminder
+    closeTimeForBreakButton.addEventListener('click', function () {
+        timeForBreak.style.display = 'none';
+        setDefaultWindow();
+    });
+
+    function startWork() {
         if (state !== 'working') {
             myStatus.textContent = 'Working';
             workStart = Date.now();
@@ -92,10 +101,9 @@
             }
             state = 'working';
         }
-    });
+    }
 
-    // Break Handler: pause the work timer and start a break
-    startBreakButton.addEventListener('click', function () {
+    function startBreak() {
         if (state === 'working') {
             myStatus.textContent = 'On break';
             workTotal += Date.now() - workStart;  // Save the finished work segment
@@ -103,13 +111,7 @@
             breakStart = Date.now();
             state = 'onBreak';
         }
-    });
-
-    // Dismiss Handler: hide the break reminder
-    closeTimeForBreakButton.addEventListener('click', function () {
-        timeForBreak.style.display = 'none';
-        setDefaultWindow();
-    });
+    }
 
     // Updates the displays and shows reminders (called every second)
     function updateTimer() {
