@@ -15,14 +15,101 @@
             maximizeButton='yes'
             minimizeButton='yes'
     />
-    <title>Break Reminder</title>
+    <title>digiCoon's break reminder</title>
+    <style>
+        body {
+            background-color: #12111A;
+            color: #F1F5F9;
+            margin: 0;
+            padding: 16px;
+        }
+
+        h1 {
+            margin: 0 0 12px 0;
+            font-size: 22px;
+        }
+
+        button {
+            background-color: #1E1B2E;
+            color: #F1F5F9;
+            border: 2px solid #8574FB;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #8574FB;
+            background-image: linear-gradient(90deg, #8CFEFE, #8574FB, #FE27FD);
+            color: #12111A;
+            border-color: #8574FB;
+            box-shadow: 0 0 12px #8574FB;
+        }
+
+        #myStatus {
+            margin: 0 0 12px 0;
+            font-size: 18px;
+        }
+
+        #myStatus.idle {
+            color: #8574FB;
+        }
+
+        #myStatus.working {
+            color: #FE27FD;
+        }
+
+        #myStatus.onBreak {
+            color: #8CFEFE;
+        }
+
+        #myTimer,
+        #breakTimer {
+            margin-bottom: 6px;
+            font-size: 28px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #toggleButton {
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        #toggleButton.startWork {
+            border-color: #8CFEFE;
+        }
+
+        #toggleButton.startBreak {
+            border-color: #FE27FD;
+        }
+
+        #timeForBreak {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background-color: #1E1B2E;
+            border: 2px solid #FE27FD;
+            border-radius: 6px;
+            color: #FE27FD;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 0 12px #FE27FD;
+        }
+
+        #closeTimeForBreakButton {
+            display: block;
+            margin: 12px auto 0 auto;
+        }
+    </style>
 </head>
 
 <body>
-<h1>Break Reminder</h1>
+<h1>digiCoon's break reminder</h1>
 
-<!-- Current status: 'Free Time' / 'Working' / 'On break' -->
-<p id='myStatus'>Free Time</p>
+<!-- Current status: 'free time' / 'working' / 'on break' -->
+<p id='myStatus' class='idle'>free time</p>
 
 <!-- Total work time -->
 <div id='myTimer'></div>
@@ -30,13 +117,13 @@
 <!-- Break time (break credit + running break) -->
 <div id='breakTimer'></div>
 
-<!-- Switches between 'Start Work' and 'Start Break' -->
-<button id='toggleButton'>Start Work</button>
+<!-- Switches between 'start work' and 'start break' -->
+<button id='toggleButton'>start work</button>
 
 <!-- Break reminder (hidden until a reminder is due) -->
-<div id='timeForBreak' style='display: none;'>
-    Time for a Break!
-    <button id='closeTimeForBreakButton'>Dismiss</button>
+<div id='timeForBreak'>
+    time for a break!
+    <button id='closeTimeForBreakButton'>dismiss</button>
 </div>
 
 <script>
@@ -75,15 +162,17 @@
     function toggleWorkBreak() {
         if (state !== 'working') {
             startWork();
-            toggleButton.textContent = 'Start Break';
+            toggleButton.textContent = 'start break';
+            toggleButton.className = 'startBreak';
         } else {
             startBreak();
-            toggleButton.textContent = 'Start Work';
+            toggleButton.textContent = 'start work';
+            toggleButton.className = 'startWork';
         }
     }
 
     function startWork() {
-        myStatus.textContent = 'Working';
+        myStatus.textContent = 'working';
         workStart = Date.now();
         // Coming back from a break: check if it counts towards the break credit
         if (state === 'onBreak') {
@@ -98,20 +187,22 @@
                 breakTotal = 0;
                 nextReminder = 60 * MINUTE;
                 timeForBreak.style.display = 'none';
-                closeTimeForBreakButton.style.display = '';
+                closeTimeForBreakButton.style.visibility = '';
                 setDefaultWindow();
             }
             breakStart = null;
         }
         state = 'working';
+        myStatus.className = state;
     }
 
     function startBreak() {
-        myStatus.textContent = 'On break';
+        myStatus.textContent = 'on break';
         workTotal += Date.now() - workStart;  // Save the finished work segment
         workStart = null;
         breakStart = Date.now();
         state = 'onBreak';
+        myStatus.className = state;
     }
 
     // Updates the displays and shows reminders (called every second)
@@ -135,7 +226,7 @@
             centerWindow();
             // From 90 minutes on: no dismiss, forced break
             if (nextReminder >= 90 * MINUTE) {
-                closeTimeForBreakButton.style.display = 'none';
+                closeTimeForBreakButton.style.visibility = 'hidden';
                 setFullScreenWindow();
             }
             nextReminder += 10 * MINUTE;
